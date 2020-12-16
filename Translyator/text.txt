@@ -1,0 +1,15 @@
+/*programm*/
+int i;
+int  range;
+float f, h, g;
+int1 a[5];
+{
+	i = 0;
+	while i < range:
+	{
+		scan(f);
+		a[i] = f;
+		print(a[i]);
+		i = i + 1;
+	}
+}
