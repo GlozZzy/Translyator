@@ -4,9 +4,16 @@
 #include <string>
 #include <cstring>  
 #include <vector>
+#include <map>
 
 using namespace std;
 #define NLeck 30
+
+int mVar;
+map < string, int > Init_int;
+map < string, int*> Init_int1;
+map < string, float > Init_float;
+
 
 // -1 - не зарезервированные, 0 - число, 1 - лексема(зарезервированная)
 
@@ -24,7 +31,6 @@ struct ops {
 		prv = NULL;
 	}
 };
-
 
 
 struct bib {
@@ -45,52 +51,78 @@ struct bib {
 };
 
 
-void add(ops*& P, int v = 0, string s = "", float f = 0) {
-	ops* a = new ops;
-	if (s != "") {
-		a->s = s;
-		a->next = NULL;
-		a->prv = P;
-		P->next = a;
+void proc(int v) {
+	switch (v) {
+	case 1:
+		mVar = 1;
+		break;
+	case 2:
+		mVar = 2;
+		break;
+	case 3:
+		mVar = 3;
+		break;
+	case 4:
+		mVar = -1;
+		break;
+	case 5:
+		break;
 	}
-	if (v) {
-		switch (v) {
-		case 1:
-			
-			a->num = 1;
-			a->next = NULL;
-			a->prv = P;
-			P->next = a;
-		case 2:
-			a->num = 2;
-			a->next = NULL;
-			a->prv = P;
-			P->next = a;
-		case 3:
-			a->num = 3;
-			a->next = NULL;
-			a->prv = P;
-			P->next = a;
-		case 4:
-			a->num = 4;
-			a->next = NULL;
-			a->prv = P;
-			P->next = a;
-		case 5:
-			a->num = 5;
+	
+}
+
+
+int Variable(string s = "", int k = 0) {
+	if (Init_int[s] || Init_int1[s] || Init_float[s]) { cout << "Переменная уже объявлена"; return -1; }
+	switch (mVar) {
+	case 1:
+
+		Init_int[s] = 0;
+		break;
+
+	case 2:
+		Init_int1[s] = new int[k];
+		break;
+	case 3:
+		Init_float[s] = 0;
+		break;
+	}
+}
+
+
+int add(ops*& P, int v = 0, string s = "", float f = 0) {
+	if (s != "") {
+		if (v == 1)
+		{
+			ops* a = new ops;
+			a->s = s;
 			a->next = NULL;
 			a->prv = P;
 			P->next = a;
 		}
+		else if (Init_int[s] || Init_int1[s] || Init_float[s]) {
+			ops* a = new ops;
+			a->s = s;
+			a->next = NULL;
+			a->prv = P;
+			P->next = a;
+		}
+		else return -1;
 	}
 	else {
-
+		ops* a = new ops;
+		a->val = f;
+		a->next = NULL;
+		a->prv = P;
+		P->next = a;
 	}
 	P = P->next;
 }
 
 
-bool s0(bib*& C);
+
+
+
 bool p(bib*& C, ops*& P);
 bool r(bib*& C, ops*& P);
 bool m(bib*& C, ops*& P);
@@ -112,7 +144,7 @@ bool h(bib*& C, ops*& P);
 bool z(bib*& C, ops*& P);
 
 
-bool s0(bib*& C, ops*& P) {
+/*bool s0(bib*& C, ops*& P) {
 	if (p(C, P)) {
 		if (C->s == "┴") {
 			C = C->next;
@@ -121,7 +153,7 @@ bool s0(bib*& C, ops*& P) {
 		else return false;
 	}
 	else return false;
-}
+}*/
 
 
 bool p(bib*& C, ops*& P) {
