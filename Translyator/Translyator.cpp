@@ -10,9 +10,9 @@ using namespace std;
 #define NLeck 30
 
 int mVar;
-map < string, int > Init_int;
-map < string, int*> Init_int1;
-map < string, float > Init_float;
+map <string, int> Init_int;
+map <string, int*> Init_int1;
+map <string, float> Init_float;
 
 
 // -1 - не зарезервированные, 0 - число, 1 - лексема(зарезервированная)
@@ -21,12 +21,14 @@ struct ops {
 	float val;
 	int num;
 	string s;
+	ops* jmp;
 	ops* next;
 	ops* prv;
 
 	ops() {
 		val = 0;
 		s = "";
+		jmp = NULL;
 		next = NULL;
 		prv = NULL;
 	}
@@ -67,19 +69,19 @@ void proc(int v) {
 		break;
 	case 5:
 		break;
+	case 6: //if
+		break;
 	}
 	
 }
 
 
 int Variable(string s = "", int k = 0) {
-	if (Init_int[s] || Init_int1[s] || Init_float[s]) { cout << "Переменная уже объявлена"; return -1; }
+	if (Init_int.find(s) != Init_int.end() || Init_int1.find(s) != Init_int1.end() || Init_float.find(s) != Init_float.end()) { cout << "Переменная уже объявлена"; return -1; }
 	switch (mVar) {
 	case 1:
-
 		Init_int[s] = 0;
 		break;
-
 	case 2:
 		Init_int1[s] = new int[k];
 		break;
@@ -100,7 +102,7 @@ int add(ops*& P, int v = 0, string s = "", float f = 0) {
 			a->prv = P;
 			P->next = a;
 		}
-		else if (Init_int[s] || Init_int1[s] || Init_float[s]) {
+		else if (Init_int.find(s) != Init_int.end() || Init_int1.find(s) != Init_int1.end() || Init_float.find(s) != Init_float.end()) {
 			ops* a = new ops;
 			a->s = s;
 			a->next = NULL;
@@ -118,6 +120,7 @@ int add(ops*& P, int v = 0, string s = "", float f = 0) {
 	}
 	P = P->next;
 }
+
 
 
 
@@ -159,7 +162,7 @@ bool z(bib*& C, ops*& P);
 bool p(bib*& C, ops*& P) {
 	bool boo;
 	if (C->s == "int") {
-		add(P, 1);
+		proc(1);
 		C = C->next;
 		if (r(C, P) && p(C, P)) {
 			boo = true;
@@ -167,7 +170,7 @@ bool p(bib*& C, ops*& P) {
 		else boo = false;
 	}
 	else if (C->s == "float") {
-		add(P, 3);
+		proc(3);
 		C = C->next;
 		if (r(C, P) && p(C, P)) {
 			boo = true;
@@ -175,7 +178,7 @@ bool p(bib*& C, ops*& P) {
 		else boo = false;
 	}
 	else if (C->s == "int1") {
-		add(P, 2);
+		proc(2);
 		C = C->next;
 		if (b(C, P) && p(C, P)) {
 			boo = true;
@@ -183,10 +186,10 @@ bool p(bib*& C, ops*& P) {
 		else boo = false;
 	}
 	else if (C->s == "{") {
-		add(P, 4);
+		proc(4);
 		C = C->next;
 		if (a(C, P) && q(C, P) && (C->s == "}")) {
-			add(P, 5);
+			proc(5);
 			/*if (C->next) {
 				C = C->next; p(C, P);
 			}*/
@@ -202,7 +205,7 @@ bool p(bib*& C, ops*& P) {
 
 bool r(bib*& C, ops*& P) {
 	if (C->type == -1) {
-		add(P, 6, C->s);
+		Variable(C->s);
 		C = C->next;
 
 		if (m(C, P)) {
@@ -218,7 +221,7 @@ bool m(bib*& C, ops*& P) {
 	if (C->s == ",") {
 		C = C->next;
 		if (C->type == -1) {
-			add(P, 6, C->s);
+			Variable(C->s);
 			C = C->next;
 			if (m(C, P)) {
 				return true;
@@ -242,7 +245,7 @@ bool b(bib*& C, ops*& P) {
 		if (C->s == "[") {
 			C = C->next;
 			if (C->type == 0) {
-				add(P, 6, a, C->val);
+				Variable(a, C->val);
 				C = C->next;
 				if (C->s == "]") {
 					C = C->next;
@@ -270,7 +273,7 @@ bool w(bib*& C, ops*& P) {
 			if (C->s == "[") {
 				C = C->next;
 				if (C->type == 0) {
-					add(P, 6, a, C->val);
+					Variable(a, C->val);
 					C = C->next;
 					if (C->s == "]") {
 						C = C->next;
@@ -298,11 +301,15 @@ bool w(bib*& C, ops*& P) {
 bool a(bib*& C, ops*& P) {
 	bool boo = false;
 	if (C->type == -1) {
-		C = C->next; if (h(C, P) && C->s == "=") {
-			add(P, 0, C->s);
+		add(P, 0, C->s);
+		C = C->next; 
+		if (h(C, P) && C->s == "=") {
 			C = C->next;
 			boo = s(C, P);
-			if (boo) boo = q(C, P);
+			if (boo) {
+				add(P, 1, "=");
+				boo = q(C, P);
+			}
 		}
 		else  boo = false;
 	}
@@ -311,9 +318,11 @@ bool a(bib*& C, ops*& P) {
 		if (C->s == "(") {
 			C = C->next;
 			if (C->type == -1) {
+				add(P, 0, C->s);
 				C = C->next;
 				if (h(C, P) && C->s == ")") {
 					C = C->next;
+					add(P, 1, "#s");
 					boo = q(C, P);
 				}
 			}
@@ -325,22 +334,47 @@ bool a(bib*& C, ops*& P) {
 			C = C->next;
 			if (s(C, P) && C->s == ")") {
 				C = C->next;
+				add(P, 1, "#p");
 				boo = q(C, P);
 			}
 		}
 	}
 	else if (C->s == "if") {
+		ops* a;
+		ops* b = P;
 		C = C->next;
 		if (c(C, P) && C->s == ":") {
+			add(P, 1, "#jf");
+			a = P;
 			C = C->next;
-			if (j(C, P) && e(C, P) && q(C, P)) boo = true;
+			if (j(C, P)) {
+				add(P, 1, "#j");
+				b = P;
+				boo = true;
+				a->jmp = P;
+			}
+			if (boo && e(C, P)) {
+				b->jmp = P;
+				boo = true;
+			};
+			if (boo && q(C, P)) boo = true;
 		}
 	}
 	else if (C->s == "while") {
+		ops* a = P;
 		C = C->next;
 		if (c(C, P) && C->s == ":") {
+			add(P, 1, "#jf");
+			ops* b = P;
 			C = C->next;
-			if (j(C, P) && z(C, P) && q(C, P)) boo = true;
+			if (j(C, P) && z(C, P)) 
+			{
+				add(P, 1, "#j"); 
+				P->jmp = a->next;  
+				b->jmp = P;
+				boo = true; 
+			};
+			if (boo && q(C, P)) boo = true;
 		}
 	}
 	else if (C->s == "{") {
@@ -371,10 +405,15 @@ bool e(bib*& C, ops*& P) {
 bool j(bib*& C, ops*& P) {
 	bool boo = false;
 	if (C->type == -1) {
-		C = C->next; if (h(C, P) && C->s == "=") {
+		add(P, 0, C->s);
+		C = C->next; 
+		if (h(C, P) && C->s == "=") {
 			C = C->next;
 			boo = s(C, P);
-			if (boo) boo = z(C, P);
+			if (boo) {
+				add(P, 1, "=");
+				boo = z(C, P);
+			}
 		}
 		else  boo = false;
 	}
@@ -383,9 +422,11 @@ bool j(bib*& C, ops*& P) {
 		if (C->s == "(") {
 			C = C->next;
 			if (C->type == -1) {
+				add(P, 0, C->s);
 				C = C->next;
 				if (h(C, P) && C->s == ")") {
 					C = C->next;
+					add(P, 1, "#s");
 					boo = true;
 				}
 			}
@@ -397,22 +438,45 @@ bool j(bib*& C, ops*& P) {
 			C = C->next;
 			if (s(C, P) && C->s == ")") {
 				C = C->next;
+				add(P, 1, "#p");
 				boo = true;
 			}
 		}
 	}
 	else if (C->s == "if") {
+		ops* a;
+		ops* b = P;
 		C = C->next;
 		if (c(C, P) && C->s == ":") {
+			add(P, 1, "#jf");
+			a = P;
 			C = C->next;
-			if (j(C, P) && e(C, P) && z(C, P)) boo = true;
+			if (j(C, P)) {
+				add(P, 1, "#j");
+				b = P;
+				boo = true;
+				a->jmp = P;
+			}
+			if (boo && e(C, P)) {
+				b->jmp = P;
+				boo = true;
+			};
 		}
 	}
 	else if (C->s == "while") {
+		ops* a = P;
 		C = C->next;
 		if (c(C, P) && C->s == ":") {
+			add(P, 1, "#jf");
+			ops* b = P;
 			C = C->next;
-			if (j(C, P) && z(C, P)) boo = true;
+			if (j(C, P) && z(C, P))
+			{
+				add(P, 1, "#j");
+				P->jmp = a->next;
+				b->jmp = P;
+				boo = true;
+			};
 		}
 	}
 	else if (C->s == "{") {
@@ -442,16 +506,18 @@ bool q(bib*& C, ops*& P) {
 
 bool c(bib*& C, ops*& P) {
 	bool b = false;
+	int fl = 0;
 	if (C->s == "(") {
 		C = C->next; if (s(C, P) && C->s == ")") { C = C->next; b = true; }
 	}
-	else if (C->type == -1) { C = C->next;  if (h(C, P)) b = true; }
-	else if (C->type == 0) { C = C->next; b = true; }
-	else if (C->s == "-") { C = C->next;  if (g(C, P)) b = true; }
+	else if (C->type == -1) { add(P, 0, C->s); C = C->next;  if (h(C, P)) b = true; }
+	else if (C->type == 0) { add(P, 1, C->s, C->val); C = C->next; b = true; }
+	else if (C->s == "-") { fl = 1; C = C->next;  if (g(C, P)) b = true; }
 	else if (C->s == "+") {
 		C = C->next;  if (g(C, P)) b = true;
 	}
 	if (b) b = v(C, P);
+	if (fl) add(P, 1, "-'");
 	if (b) b = u(C, P);
 	if (b) b = d(C, P);
 	return b;
@@ -460,6 +526,7 @@ bool c(bib*& C, ops*& P) {
 
 bool d(bib*& C, ops*& P) {
 	bool b = false;
+	string zn = C->s;
 	if (C->s == "<") { C = C->next; b = true; }
 	else if (C->s == ">") { C = C->next; b = true; }
 	else if (C->s == "<=") { C = C->next; b = true; }
@@ -470,76 +537,88 @@ bool d(bib*& C, ops*& P) {
 	else if (C->s == "or") { C = C->next; b = true; }
 	else { return true; }
 	if (b) b = s(C, P);
-	if (b) b = z(C, P);
+	if (b) { b = z(C, P); add(P, 1, zn); }
+	
 	return b;
 }
 
 
 bool s(bib*& C, ops*& P) {
 	bool b = false;
+	int fl = 0;
 	if (C->s == "(") {
 		C = C->next; if (s(C, P) && C->s == ")") { C = C->next; b = true; }
 	}
-	else if (C->type == -1) { C = C->next;  if (h(C, P)) b = true; }
-	else if (C->type == 0) { C = C->next; b = true; }
-	else if (C->s == "-") { C = C->next;  if (g(C, P)) b = true; }
+	else if (C->type == -1) { add(P, 0, C->s); C = C->next;  if (h(C, P)) b = true; }
+	else if (C->type == 0) { add(P, 1, C->s, C->val); C = C->next; b = true; }
+	else if (C->s == "-") { fl = 1; C = C->next;  if (g(C, P)) b = true; }
 	else if (C->s == "+") {
 		C = C->next;  if (g(C, P)) b = true;
 	}
 	if (b) b = v(C, P);
+	if (fl) add(P, 1, "-'");
 	if (b) b = u(C, P);
 	return b;
 }
 
 
 bool u(bib*& C, ops*& P) {
+	string zn = C->s;
 	if (C->s == "+") C = C->next;
 	else if (C->s == "-")  C = C->next;
 	else return true;
 	bool b;
 	b = t(C, P);
+	add(P, 1, zn);
 	if (b) b = u(C, P);
+	
 	return b;
 }
 
 
 bool t(bib*& C, ops*& P) {
 	bool b = false;
+	int fl = 0;
 	if (C->s == "(") {
 		C = C->next; if (s(C, P) && C->s == ")") { C = C->next; b = true; }
 	}
-	else if (C->type == -1) { C = C->next;  if (h(C, P)) b = true; }
-	else if (C->type == 0) { C = C->next; b = true; }
-	else if (C->s == "-") { C = C->next;  if (g(C, P)) b = true; }
+	else if (C->type == -1) { add(P, 0, C->s); C = C->next;  if (h(C, P)) b = true; }
+	else if (C->type == 0) { add(P, 1, C->s, C->val); C = C->next; b = true; }
+	else if (C->s == "-") { fl = 1; C = C->next;  if (g(C, P)) b = true; }
 	else if (C->s == "+") {
 		C = C->next;  if (g(C, P)) b = true;
 	}
 	if (b) b = v(C, P);
+	if (fl) add(P, 1, "-'");
 	return b;
 }
 
 
 bool v(bib*& C, ops*& P) {
+	string zn = C->s;
 	if (C->s == "*")  C = C->next;
 	else if (C->s == "/")  C = C->next;
 	else return true;
 	bool boo = f(C, P);
 	if (boo) boo = v(C, P);
+	add(P, 1, zn);
 	return boo;
 }
 
 
 bool f(bib*& C, ops*& P) {
 	bool boo = false;
+	int fl = 0;
 	if (C->s == "(") {
 		C = C->next; if (s(C, P) && C->s == ")") { C = C->next; boo = true; }
 	}
-	else if (C->type == -1) { C = C->next;  if (h(C, P)) boo = true; }
-	else if (C->type == 0) { C = C->next; boo = true; }
-	else if (C->s == "-") { C = C->next;  if (g(C, P)) boo = true; }
+	else if (C->type == -1) { add(P, 0, C->s); C = C->next;  if (h(C, P)) boo = true; }
+	else if (C->type == 0) { add(P, 1, C->s, C->val); C = C->next; boo = true; }
+	else if (C->s == "-") { fl = 1; C = C->next;  if (g(C, P)) boo = true; }
 	else if (C->s == "+") {
 		C = C->next;  if (g(C, P)) boo = true;
 	}
+	if (fl) add(P, 1, "-'");
 	return boo;
 }
 
@@ -549,15 +628,18 @@ bool g(bib*& C, ops*& P) {
 	if (C->s == "(") {
 		C = C->next; if (s(C, P) && C->s == ")") { C = C->next; boo = true; }
 	}
-	else if (C->type == -1) { C = C->next;  if (h(C, P)) boo = true; }
-	else if (C->type == 0) { C = C->next; boo = true; }
+	else if (C->type == -1) { add(P, 0, C->s); C = C->next;  if (h(C, P)) boo = true; }
+	else if (C->type == 0) { add(P, 1, C->s, C->val); C = C->next; boo = true; }
 	return boo;
 }
 
 
 bool h(bib*& C, ops*& P) {
 	bool boo = true;
-	if (C->s == "[") C = C->next; if (s(C, P) && C->s == "]") { C = C->next; boo = true; }
+	if (C->s == "[") {
+		C = C->next; 
+		if (s(C, P) && C->s == "]") { add(P, 1, "#i"); C = C->next; boo = true; }
+	}
 	return boo;
 }
 
@@ -687,7 +769,7 @@ void find_new_leksem(int& i, int jj, string line, int M[10][13], int M_sem[10][1
 	}
 
 	if (s > k) {
-		cout << "error in " << jj << ' ' << i << endl;
+		cout << "Syntax error in " << jj << ' ' << i << endl;
 	}
 	else if (name.length()) {
 		a->s = name;
@@ -810,6 +892,15 @@ int main() {
 		cout << " --- ---" << endl;
 		C_temp = C_temp->next;
 	}*/
+	PS_temp = &PS;
+	PS_temp = PS_temp->next;
+	while (PS_temp) {
+		if (PS_temp->s != "") cout << PS_temp->s << endl;
+		else cout << PS_temp->val << endl;
+		if (PS_temp->jmp) cout << PS_temp->jmp->s << endl;
+		cout << " --- ---" << endl;
+		PS_temp = PS_temp->next;
+	}
 
 	return 0;
 }
@@ -823,11 +914,13 @@ float f, h, g;
 int1 a[5];
 {
 	i = 0;
+	f = 1;
 	while i < range:
 	{
 		scan(f);
 		a[i] = f;
 		print(a[i]);
+		f = f * -2;
 		i = i + 1;
 	}
 }*/
