@@ -1,19 +1,18 @@
-/*programm
+/*programm*/
 int i;
 int  range;
 float f, h, g;
 int1 a[5];
 {
-
 	i = 0;
 	f = 1;
 	while i < range:
 	{
-		if i < range: scan(f);
-		
+		scan(f);
 		a[i] = f;
 		print(a[i]);
 		f = f * -2;
 		i = i + 1;
 	}
-}*/
+}
+!
