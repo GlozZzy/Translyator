@@ -1,0 +1,7 @@
+/*programm*/
+int i, range;
+float h, g;
+int1 a[5];
+{
+	i = 0;
+	h = 1;

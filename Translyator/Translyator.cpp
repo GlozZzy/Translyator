@@ -82,6 +82,7 @@ struct bib {
 };
 
 
+
 struct magz {
 	float val;
 	string s;
@@ -97,8 +98,6 @@ struct magz {
 		indx = -1;
 	}
 };
-
-
 void del(magz* m) { delete[] m; }
 
 
@@ -118,6 +117,7 @@ void interpreter(ops*& P) {
 			a = M->prv;
 			M = NULL;
 			M = a;
+			M->s = "res";
 			M->val = pr;
 
 		}
@@ -129,6 +129,7 @@ void interpreter(ops*& P) {
 			a = M->prv;
 			M = NULL;
 			M = a;
+			M->s = "res";
 			M->val = pr;
 		}
 		else if (P->s == "-'")
@@ -142,6 +143,7 @@ void interpreter(ops*& P) {
 			a = M->prv;
 			M = NULL;
 			M = a;
+			M->s = "res";
 
 			M->val = pr;
 		}
@@ -153,6 +155,7 @@ void interpreter(ops*& P) {
 			M = NULL;
 			M = a;
 			M->val = pr;
+			M->s = "res";
 		}
 		else if (P->s == ">=")
 		{
@@ -261,9 +264,7 @@ void interpreter(ops*& P) {
 			cin >> M->val;
 			if (M->indx == -1)
 			{
-				if (Init_float.find(M->s) != Init_float.end())
-					Init_float[M->s] = M->val;
-				else  Init_int[M->s] = M->val;
+				Init_float[M->s] = M->val;
 			}
 			else
 			{
@@ -286,7 +287,9 @@ void interpreter(ops*& P) {
 		else if (P->s == "#i")
 		{
 			magz* a = new magz;
-			a->val = Init_int1[M->prv->s][int(M->val)];
+			a->val = Init_int1[M->prv->s][(int)M->val];
+			Init_float[M->s] = (int)M->val;
+
 			a->indx = M->val;
 			a->s = M->prv->s;
 			a->prv = M->prv->prv;
@@ -296,9 +299,7 @@ void interpreter(ops*& P) {
 		else if (P->s == "=") {
 			if (M->prv->indx == -1)
 			{
-				if (Init_float.find(M->prv->s) != Init_float.end())
 				Init_float[M->prv->s] = M->val;
-				else  Init_int[M->prv->s] = M->val;
 			}
 			else
 			{
@@ -316,8 +317,7 @@ void interpreter(ops*& P) {
 
 
 			a->s = P->s;
-			if(Init_float.find(P->s) != Init_float.end()) a->val = Init_float[P->s];
-			else a->val = Init_int[P->s];
+			a->val = Init_float[P->s];
 			a->prv = M;
 			M->next = a;
 			M = M->next;
