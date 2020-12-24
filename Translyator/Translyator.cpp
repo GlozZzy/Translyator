@@ -84,178 +84,260 @@ struct bib {
 
 struct magz {
 	float val;
+	string s;
 	magz* next;
 	magz* prv;
+	int indx;
 
 	magz() {
 		val = 0;
 		next = NULL;
 		prv = NULL;
+		s = "1";
+		indx = -1;
 	}
 };
 
 
+void del(magz* m) { delete[] m; }
+
 
 void interpreter(ops*& P) {
-	//magz* M = new magz;
-	//int i;
-	//while (P)
-	//{
-	//	if (P->s != "")
-	//	{
-	//		if (P->s == "+")
-	//		{
-	//			if (M->prv->s != "" && M->s != "") {
-	//				if (Init_int.find(M->prv->s) != Init_int.end() && Init_int.find(M->s) != Init_int.end())
-	//					M->prv->val = Init_int[M->prv->s] + Init_int[M->s];
-	//				else if (Init_int.find(M->prv->s) != Init_int.end() && Init_float.find(M->s) != Init_float.end())
-	//					M->prv->val = Init_int[M->prv->s] + Init_float[M->s];
-	//				else if (Init_float.find(M->prv->s) != Init_float.end() && Init_float.find(M->s) != Init_float.end())
-	//					M->prv->val = Init_float[M->prv->s] + Init_float[M->s];
-	//				else M->prv->val = Init_float[M->prv->s] + Init_int[M->s];   //pizdec
-	//			}
-	//			else if (M->prv->s != "" && M->s == "") {
-	//				if (Init_int.find(M->prv->s) != Init_int.end())
-	//					M->prv->val = Init_int[M->prv->s] + M->val;
-	//				else M->prv->val = Init_float[M->prv->s] + M->val;   //pizdec
-	//			}
-	//			else if (M->prv->s == "" && M->s != "") {
-	//				if (Init_int.find(M->s) != Init_int.end())
-	//					M->prv->val = Init_int[M->s] + M->prv->val;
-	//				else M->prv->val = Init_float[M->s] + M->prv->val;   //pizdec
-	//			}
-	//			else { M->prv->val = M->prv->val + M->val; }
+	magz* M = new magz;
+	magz m;
+	int i;
+	while (P)
+	{
 
-	//			M = M->prv;
-	//			M->s = "";
-	//			delete M->next;
-	//			M->next = NULL;
-	//		}
-	//		else if (P->s == "-")
-	//		{
-	//			if (M->prv->s != "" && M->s != "") {
-	//				if (Init_int.find(M->prv->s) != Init_int.end() && Init_int.find(M->s) != Init_int.end())
-	//					M->prv->val = Init_int[M->prv->s] - Init_int[M->s];
-	//				else if (Init_int.find(M->prv->s) != Init_int.end() && Init_float.find(M->s) != Init_float.end())
-	//					M->prv->val = Init_int[M->prv->s] - Init_float[M->s];
-	//				else if (Init_float.find(M->prv->s) != Init_float.end() && Init_float.find(M->s) != Init_float.end())
-	//					M->prv->val = Init_float[M->prv->s] - Init_float[M->s];
-	//				else M->prv->val = Init_float[M->prv->s] - Init_int[M->s];   //pizdec
-	//			}
-	//			else if (M->prv->s != "" && M->s == "") {
-	//				if (Init_int.find(M->prv->s) != Init_int.end())
-	//					M->prv->val = Init_int[M->prv->s] - M->val;
-	//				else M->prv->val = Init_float[M->prv->s] - M->val;   //pizdec
-	//			}
-	//			else if (M->prv->s == "" && M->s != "") {
-	//				if (Init_int.find(M->s) != Init_int.end())
-	//					M->prv->val = M->prv->val - Init_int[M->s];
-	//				else M->prv->val = M->prv->val - Init_float[M->s];   //pizdec
-	//			}
-	//			else { M->prv->val = M->prv->val - M->val; }
 
-	//			M = M->prv;
-	//			M->s = "";
-	//			delete M->next;
-	//			M->next = NULL;
-	//		}
-	//		else if (P->s == "-'")
-	//			;
-	//		else if (P->s == "/")
-	//		{
-	//			if (M->prv->s != "" && M->s != "") {
-	//				if (Init_int.find(M->prv->s) != Init_int.end() && Init_int.find(M->s) != Init_int.end())
-	//					M->prv->val = Init_int[M->prv->s] / Init_int[M->s];
-	//				else if (Init_int.find(M->prv->s) != Init_int.end() && Init_float.find(M->s) != Init_float.end())
-	//					M->prv->val = Init_int[M->prv->s] / Init_float[M->s];
-	//				else if (Init_float.find(M->prv->s) != Init_float.end() && Init_float.find(M->s) != Init_float.end())
-	//					M->prv->val = Init_float[M->prv->s] / Init_float[M->s];
-	//				else M->prv->val = Init_float[M->prv->s] / Init_int[M->s];   //pizdec
-	//			}
-	//			else if (M->prv->s != "" && M->s == "") {
-	//				if (Init_int.find(M->prv->s) != Init_int.end())
-	//					M->prv->val = Init_int[M->prv->s] / M->val;
-	//				else M->prv->val = Init_float[M->prv->s] / M->val;   //pizdec
-	//			}
-	//			else if (M->prv->s == "" && M->s != "") {
-	//				if (Init_int.find(M->s) != Init_int.end())
-	//					M->prv->val = M->prv->val / Init_int[M->s];
-	//				else M->prv->val = M->prv->val / Init_float[M->s];   //pizdec
-	//			}
-	//			else { M->prv->val = M->prv->val / M->val; }
+		if (P->s == "+")
+		{
+			float pr = M->val + M->prv->val;
 
-	//			M = M->prv;
-	//			M->s = "";
-	//			delete M->next;
-	//			M->next = NULL;
-	//		}
-	//		else if (P->s == "*")
-	//			;
-	//		else if (P->s == ">=")
-	//			;
-	//		else if (P->s == "<=")
-	//			;
-	//		else if (P->s == "<")
-	//			;
-	//		else if (P->s == ">")
-	//			;
-	//		else if (P->s == "!=")
-	//			;
-	//		else if (P->s == "==")
-	//			;
-	//		else if (P->s == "#jf")
-	//			;
-	//		else if (P->s == "#j")
-	//			;
-	//		else if (P->s == "#s")
-	//			;
-	//		else if (P->s == "#p")
-	//			;
-	//		else if (P->s == "#i");
-	//		/*{
-	//			Init_int1[M->prv->s] = (int)M->val;
-	//			pop(M);
-	//			pop(M->prv);
-	//		}*/
-	//		else if (P->s == "=") {
-	//			if (Init_int.find(P->prv->prv->s) != Init_int.end())
-	//			{
-	//				Init_int[M->prv->s] = (int)M->val;
-	//				pop(M);
-	//				pop(M->prv);
-	//			}
-	//			else if (Init_int1.find(P->prv->prv->s) != Init_int1.end());
-	//			/*{
-	//				Init_int1[M->prv->s][] = M->val;
-	//				pop(M);
-	//				pop(M->prv);
-	//			}*/
-	//			else if (Init_float.find(P->prv->prv->s) != Init_float.end())
-	//			{
-	//				Init_float[M->prv->s] = M->val;
-	//				pop(M);
-	//				pop(M->prv);
-	//			}
-	//		}
-	//		else {
-	//			magz* a = new magz;
-	//			M->s = P->s;
-	//			a->prv = M;
-	//			M->next = a;
-	//			M = M->next;
-	//		}
-	//	}
-	//	else {
-	//		magz* a = new magz;
-	//		M->val = P->val;
-	//		a->prv = M;
-	//		M->next = a;
-	//		M = M->next;
-	//	}
-	//	
-	//	P = P->next;
-	//}
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+			M->val = pr;
+
+		}
+		else if (P->s == "-")
+		{
+			float pr = M->prv->val - M->val;
+
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+			M->val = pr;
+		}
+		else if (P->s == "-'")
+		{
+			M->val = (-1) * M->val;
+		}
+		else if (P->s == "/")
+		{
+			float pr = M->prv->val / M->val;
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+
+			M->val = pr;
+		}
+		else if (P->s == "*")
+		{
+			float pr = M->val * M->prv->val;
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+			M->val = pr;
+		}
+		else if (P->s == ">=")
+		{
+			int pr;
+			if (M->prv->val >= M->val)
+			{
+				pr = 1;
+			}
+			else
+				pr = 0;
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+			M->val = pr;
+		}
+		else if (P->s == "<=")
+		{
+			int pr;
+			if (M->prv->val <= M->val)
+			{
+				pr = 1;
+			}
+			else
+				pr = 0;
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+			M->val = pr;
+		}
+		else if (P->s == "<")
+		{
+			int pr;
+			if (M->prv->val < M->val)
+			{
+				pr = 1;
+			}
+			else
+				pr = 0;
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+			M->val = pr;
+		}
+		else if (P->s == ">")
+		{
+			int pr;
+			if (M->prv->val > M->val)
+			{
+				pr = 1;
+			}
+			else
+				pr = 0;
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+			M->val = pr;
+		}
+		else if (P->s == "!=")
+		{
+			int pr;
+			if (M->prv->val != M->val)
+			{
+				pr = 1;
+			}
+			else
+				pr = 0;
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+			M->val = pr;
+		}
+		else if (P->s == "==")
+		{
+			int pr;
+			if (M->prv->val == M->val)
+			{
+				pr = 1;
+			}
+			else
+				pr = 0;
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+			M->val = pr;
+		}
+		else if (P->s == "#jf")
+		{
+			if (!M->val) P = P->jmp;
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+		}
+		else if (P->s == "#j")
+		{
+			P = P->jmp;
+		}
+		else if (P->s == "#s")
+		{
+			cin >> M->val;
+			if (M->indx == -1)
+			{
+				if (Init_float.find(M->s) != Init_float.end())
+					Init_float[M->s] = M->val;
+				else  Init_int[M->s] = M->val;
+			}
+			else
+			{
+				Init_int1[M->s][M->indx] = M->val;
+			}
+			magz* a = new magz;
+			a = M;
+			M = NULL;
+			M = a->prv;
+		}
+		else if (P->s == "#p")
+		{
+			cout << M->val << " ";
+			magz* a = new magz;
+			a = M->prv;
+			M = NULL;
+			M = a;
+		}
+
+		else if (P->s == "#i")
+		{
+			magz* a = new magz;
+			a->val = Init_int1[M->prv->s][int(M->val)];
+			a->indx = M->val;
+			a->s = M->prv->s;
+			a->prv = M->prv->prv;
+			M = NULL;
+			M = a;
+		}
+		else if (P->s == "=") {
+			if (M->prv->indx == -1)
+			{
+				if (Init_float.find(M->prv->s) != Init_float.end())
+				Init_float[M->prv->s] = M->val;
+				else  Init_int[M->prv->s] = M->val;
+			}
+			else
+			{
+				Init_int1[M->prv->s][M->prv->indx] = M->val;
+			}
+			magz* a = new magz;
+			a = M;
+			M = NULL;
+			M = a->prv;
+
+		}
+		else if (P->s != "")
+		{
+			magz* a = new magz;
+
+
+			a->s = P->s;
+			if(Init_float.find(P->s) != Init_float.end()) a->val = Init_float[P->s];
+			else a->val = Init_int[P->s];
+			a->prv = M;
+			M->next = a;
+			M = M->next;
+		}
+		else
+		{
+			magz* a = new magz;
+			a->s = "const";
+			a->val = P->val;
+			a->prv = M;
+			M->next = a;
+			M = M->next;
+		}
+
+
+		P = P->next;
+	}
 }
+
+
 
 
 
@@ -274,10 +356,6 @@ void proc(int v) {
 	case 4:
 		mVar = -1;
 		break;
-	case 5:
-		break;
-	case 6: //if
-		break;
 	}
 
 }
@@ -286,7 +364,7 @@ void proc(int v) {
 bool Variable(string s = "", int k = 0) {
 	if (Init_int.find(s) != Init_int.end() || Init_int1.find(s) != Init_int1.end()
 		|| Init_float.find(s) != Init_float.end()) {
-		cout << "Variable " << s <<" already declared" << endl; return false;
+		cout << "Variable " << s << " already declared" << endl; return false;
 	}
 	switch (mVar) {
 	case 1:
@@ -294,12 +372,12 @@ bool Variable(string s = "", int k = 0) {
 		break;
 	case 2:
 		Init_int1[s] = new int[k];
+		for (int i = 0; i < k; i++) Init_int1[s][i] = 0;
 		break;
 	case 3:
 		Init_float[s] = 0;
 		break;
 	}
-	return true;
 }
 
 
@@ -360,17 +438,6 @@ bool h(bib*& C, ops*& P);
 bool z(bib*& C, ops*& P);
 
 
-/*bool s0(bib*& C, ops*& P) {
-	if (p(C, P)) {
-		if (C->s == "┴") {
-			C = C->next;
-			return true;
-		}
-		else return false;
-	}
-	else return false;
-}*/
-
 
 bool p(bib*& C, ops*& P) {
 	if (!C) return false;
@@ -405,9 +472,6 @@ bool p(bib*& C, ops*& P) {
 		C = C->next; if (!C) return false;
 		if (a(C, P) && q(C, P) && (C->s == "}")) {
 			proc(5);
-			/*if (C->next) {
-				C = C->next; if (!C) return false; p(C, P);
-			}*/
 			boo = true;
 		}
 		else boo = false;
@@ -590,7 +654,7 @@ bool a(bib*& C, ops*& P) {
 			if (j(C, P) && z(C, P))
 			{
 				add(P, 1, "#j");
-				P->jmp = a->next;
+				P->jmp = a;
 				b->jmp = P;
 				boo = true;
 			};
@@ -695,7 +759,7 @@ bool j(bib*& C, ops*& P) {
 			if (j(C, P) && z(C, P))
 			{
 				add(P, 1, "#j");
-				P->jmp = a->next;
+				P->jmp = a;
 				b->jmp = P;
 				boo = true;
 			};
